@@ -242,6 +242,7 @@ Animation.prototype.reverse_animation = function(){
       /* padding: 1rem; */
       padding: 0;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
     }
 
     .plot-container {
@@ -256,6 +257,7 @@ Animation.prototype.reverse_animation = function(){
       margin: 0;
       height: auto;
       display: block;
+      object-fit: cover;
     }
 
     /* Ensure plot scales nicely */
@@ -307,6 +309,92 @@ iframe {
   /* frameBorder: red solid 3px; */
 }
 
+.site-header {
+  width: 100%;
+  background: white;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.header-hero {
+  position: relative;
+  width: 100%;
+  height: 80px; /* adjust as you like */
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.header-hero img {
+  width: 120%;
+  height: auto;
+  object-fit: cover; /* fills and crops nicely */
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.header-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  text-align: center;
+  color: white;
+
+  padding: 0;
+  margin: 0;
+}
+
+.header-nav {
+  display: flex;
+  justify-content: space-around;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+  background: white;
+}
+
+.header-nav button {
+  flex: 1;
+  margin: 0 0.25rem;
+  padding: 0.6rem;
+  font-size: 1rem;
+
+  border: none;
+  border-radius: 8px;
+  background: #eaeaea;
+}
+
+.header-nav button.active {
+  background: #333;
+  color: white;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.header-text h1 {
+  font-family: DartmouthRuzicka, Georgia, serif;
+}
+
+/* @media (max-width: 600px) {
+  .header-hero {
+    height: 120px;
+  }
+
+  .header-text h1 {
+    font-size: 1.2rem;
+  }
+
+  .header-text p {
+    font-size: 0.8rem;
+  }
+} */
+
 /* 
     body {
   outline: 3px solid blue;
@@ -324,9 +412,19 @@ iframe {
 
 <body>
 
-  <header>
+  <header class="site-header">
+    <div class="header-hero">
+    <img src="maybe_header.png" alt="Header image">
+
+    <div class="header-text">
+      <h1>GIBLE</h1>
+    </div>
+  </div>
+
+  <div class="header-nav">
     <button id="nav-simulation" class="active">Simulation</button>
     <button id="nav-plot">Tonsil</button>
+  </div>
   </header>
 
 
