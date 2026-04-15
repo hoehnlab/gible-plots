@@ -275,7 +275,10 @@ Animation.prototype.reverse_animation = function(){
 }
 
 .subnav {
+  width: 100%;
   display: flex;
+  justify-content: center; 
+  align-items: center;
   gap: 0.5rem;
 }
 
@@ -318,26 +321,69 @@ Animation.prototype.reverse_animation = function(){
 
   <header>
     <button id="nav-simulation" class="active">Simulation</button>
-    <button id="nav-plot">Plot</button>
+    <button id="nav-plot">Tonsil</button>
   </header>
+
 
   <main>
 
-    <!-- Simulation View -->
+  <!-- ===================== -->
+  <!-- SIMULATION VIEW       -->
+  <!-- ===================== -->
+   <div class="plot-header">
+
+      <!-- SUBNAV (dynamic JS fills this) -->
+      <div id="plot-subnav" class="subnav hidden"></div>
+
+    </div>
+
+  <section id="view-simulation" class="view active">
+
+    <div id="view-sim-animation" class="animation plot-view" clone="2"></div>
+
+     <div id="view-sim-true_tree" class="plot-view plot-container">
+      <iframe src="6_3D.html"></iframe>
+    </div>
+
+    <div id="view-sim-gible_tree" class="plot-view plot-container">
+      <iframe src="gible_6_3D.html"></iframe>
+    </div>
+
+  </section>
+
+  <!-- ===================== -->
+  <!-- PLOT VIEW             -->
+  <!-- ===================== -->
+  <section id="view-plot" class="view">
+
+    <!-- Plot header + subnav -->
+
+    <!-- TONSIL GROUP VIEW -->
+    <div id="view-tonsil-gible_tree" class="plot-view plot-container">
+      <iframe src="tonsil_3D_tree.html"></iframe>
+    </div>
+
+  </section>
+
+</main>
+<!-- 
+  <main>
+
+    Simulation View
     <section id="view-simulation" class="view active">
       <h2>Simulation</h2>
       <div class="animation" clone="2"></div>
     </section>
 
-    <!-- Plot View -->
-    <!-- <section id="view-plot" class="view">
+    Plot View
+    <section id="view-plot" class="view">
         
       <h2>Interactive Plot</h2>
-      <div class="plot-container"> -->
-        <!-- Replace src with your exported Plotly HTML from R -->
-        <!-- <iframe src="gible_6_3D.html"></iframe>
+      <div class="plot-container">
+        Replace src with your exported Plotly HTML from R
+        <iframe src="gible_6_3D.html"></iframe>
       </div>
-    </section> -->
+    </section>
 
     <section id="view-plot" class="view">
 
@@ -360,94 +406,126 @@ Animation.prototype.reverse_animation = function(){
 
 </section>
 
-  </main>
+  </main> -->
 
   <!-- Navigation JS -->
-  <script>
-    const btnAnim = document.getElementById('nav-simulation');
-    const btnPlot = document.getElementById('nav-plot');
-    const plotSubnav = document.getElementById('plot-subnav');
+ <script>
+const btnSim = document.getElementById('nav-simulation');
+const btnPlot = document.getElementById('nav-plot');
+const plotSubnav = document.getElementById('plot-subnav');
 
-    const views = {
-        simulation: document.getElementById('view-simulation'),
-        plot: document.getElementById('view-plot')
-    }
+const views = {
+  simulation: document.getElementById('view-simulation'),
+  plot: document.getElementById('view-plot')
+};
 
-    const plotViews = {
-        sim: document.getElementById('view-plot-sim'),
-        tonsil: document.getElementById('view-plot-tonsil')
-        };
+const plotViews = {
+  sim_animation: document.getElementById('view-sim-animation'),
+  sim_true_tree: document.getElementById('view-sim-true_tree'),
+  sim_gible_tree: document.getElementById('view-sim-gible_tree'),
+  tonsil_gible_tree: document.getElementById('view-tonsil-gible_tree')
+};
 
-    function setPlot(plotType) {
-        Object.values(plotViews).forEach(v => v.classList.remove('active'));
-        plotViews[plotType].classList.add('active');
+// Allowed subviews per group
+const subnavConfig = {
+  sim: ["animation", "true_tree", "gible_tree"],
+  tonsil: ["gible_tree"]
+};
 
-        document.querySelectorAll('[data-plot]').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.plot === plotType);
-        });
+function clearTopNav() {
+  btnSim.classList.remove('active');
+  btnPlot.classList.remove('active');
+  Object.values(views).forEach(v => v.classList.remove('active'));
+}
 
-        location.hash = `plot/${plotType}`;
-        }
+function setPlotView(group, view) {
+  Object.values(plotViews).forEach(v => v.classList.remove('active'));
 
+  const key = `${group}_${view}`;
+  if (plotViews[key]) {
+    plotViews[key].classList.add('active');
+  }
 
-    function setView(view, plotType = null) {
-        // reset all
-        Object.values(views).forEach(v => v.classList.remove('active'));
+  // update subnav active state
+  document.querySelectorAll("#plot-subnav button").forEach(btn => {
+    const match =
+      btn.dataset.group === group &&
+      btn.dataset.view === view;
+    btn.classList.toggle('active', match);
+  });
+}
 
-        btnAnim.classList.remove('active');
-        btnPlot.classList.remove('active');
+function renderSubnav(group) {
+  plotSubnav.innerHTML = "";
 
+  subnavConfig[group].forEach(view => {
+    const btn = document.createElement("button");
+    btn.dataset.group = group;
+    btn.dataset.view = view;
+    btn.textContent = view;
 
-        // simulation
-        if (view === 'simulation') {
-            views.simulation.classList.add('active');
-            btnAnim.classList.add('active');
-            location.hash = 'simulation';
-            return;
-        }
+    btn.addEventListener("click", () => {
+      setRoute(group, view);
+    });
 
-        // plot mode
-        btnPlot.classList.add('active');
-        plotSubnav.classList.add('active');
+    plotSubnav.appendChild(btn);
+  });
+}
 
-        const activePlot = plotType || 'sim';
-        views[activePlot].classList.add('active');
+function setRoute(group, view = null) {
+  clearTopNav();
+  plotSubnav.classList.add("hidden");
 
-        // update submenu UI
-        document.querySelectorAll('[data-plot]').forEach(btn => {
-  btn.addEventListener('click', () => setPlot(btn.dataset.plot));
-});
+  // --------------------
+  // SIMULATION MODE
+  // --------------------
+  var defaultView = "animation";
+  if (group === "sim") {
+    views.simulation.classList.add("active");
+    views.plot.classList.remove("active");
+    btnSim.classList.add("active");
+    // location.hash = "sim/animation";
+    // return;
+  } else {
+    btnPlot.classList.add("active");
+    views.plot.classList.add("active");
+    defaultView = "gible_tree";
+  }
 
-        location.hash = `plot/${activePlot}`;
-        }
+  const activeGroup = group;
+  const activeView = view || "gible_tree";
 
-        function parseHash() {
-  const hash = location.hash.replace('#', '');
+  plotSubnav.classList.remove("hidden");
+  renderSubnav(activeGroup);
+  setPlotView(activeGroup, activeView);
 
-  if (!hash || hash === 'simulation') {
-    setView('simulation');
+  location.hash = `${activeGroup}/${activeView}`;
+}
+
+function parseHash() {
+  const hash = location.hash.replace("#", "");
+  if (!hash || hash === "sim/animation") {
+    setRoute("sim", "animation");
     return;
   }
 
-  if (hash.startsWith('plot')) {
-    const [, plotType] = hash.split('/');
-    setView('plot');
-    setPlot(plotType || 'sim');
+  const [group, view] = hash.split("/");
+
+  if (group === "sim" || group === "tonsil") {
+    setRoute(group, view);
   }
 }
 
-        window.addEventListener('load', parseHash);
-window.addEventListener('hashchange', parseHash);
+// --------------------
+// EVENT BINDINGS
+// --------------------
 
-btnAnim.addEventListener('click', () => setView('simulation'));
-btnPlot.addEventListener('click', () => setView('plot', 'sim'));
+window.addEventListener("load", parseHash);
+window.addEventListener("hashchange", parseHash);
 
-document.querySelectorAll('[data-plot]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    setView('plot', btn.dataset.plot);
-  });
-});
-  </script>
+btnSim.addEventListener("click", () => setRoute("sim"));
+btnPlot.addEventListener("click", () => setRoute("tonsil", "gible_tree"));
+</script>
 
 </body>
 <template id="anim-controls-template">
